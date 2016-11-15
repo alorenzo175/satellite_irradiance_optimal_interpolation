@@ -1,0 +1,29 @@
+name: oi
+dependencies:
+  - bokeh
+  - numpy
+  - scipy
+  - pandas
+  - python=3
+  - pytables
+  - cudatoolkit
+  - geos
+  - jupyter
+  - notebook
+  - nbconvert
+  - ipython
+  - netcdf4
+  - matplotlib
+  - cython
+  - pillow
+  - seaborn
+  - cairo
+  - cffi
+  - libffi
+  - pip:
+      - pycuda
+      - scikit-cuda
+      - pvlib
+      - cartopy
+      - cairocffi
+      

@@ -1,0 +1,106 @@
+#!/usr/bin/env python
+import os
+import argparse
+import logging
+import subprocess
+
+
+import pandas as pd
+import numpy as np
+from sklearn.cross_validation import KFold
+import yaml
+
+import satoi.input_data
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Run OI based on a config file')
+    parser.add_argument('run_path')
+    parser.add_argument('config_file')
+    args, user_args = parser.parse_known_args()
+    user_args = [str(arg) for arg in user_args]  # unifying types for Py2/Py3
+
+    with open(args.config_file, 'r') as f:
+        arg_dict = yaml.load(f)
+
+    if 'sumatra_label' in arg_dict:
+        save_dir = os.path.join(arg_dict['output_path'],
+                                arg_dict['sumatra_label'])
+        label = arg_dict['sumatra_label']
+    else:
+        save_dir = arg_dict['output_path']
+        label = None
+
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
+
+    if not os.path.isfile(arg_dict['input_data']):
+        satoi.input_data.main(arg_dict['raw_data_path'],
+                              arg_dict['satellite_file'],
+                              arg_dict['input_data'],
+                              label,
+                              arg_dict['suny'],
+                              arg_dict.get('times_file', None))
+
+    level = getattr(logging, arg_dict['loglevel'].upper())
+    logging_path = os.path.join(save_dir,
+                                arg_dict['logging_filename'])
+    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s')
+    handler = logging.FileHandler(logging_path)
+    handler.setFormatter(formatter)
+    handler.setLevel(level)
+    logger = logging.getLogger()
+    logger.addHandler(handler)
+    handler2 = logging.StreamHandler()
+    handler2.setFormatter(formatter)
+    handler2.setLevel(level)
+    logger.addHandler(handler2)
+    logger.setLevel(level)
+    if label is not None:
+        logger.info('Running with sumatra label %s', label)
+
+    inpdata = arg_dict['input_data']
+    cvk = arg_dict.get('cvk', 4)
+    random_state = arg_dict.get('random_state', 0)
+    with pd.HDFStore(inpdata, 'r') as store:
+        sensors = store['sensor_metadata'].index
+    kf = KFold(len(sensors), n_folds=cvk, shuffle=True,
+               random_state=random_state)
+    results = []
+
+    ia_str = ''
+    for key, val in arg_dict.items():
+        ia_str += '\t{}: {}\n'.format(key, val)
+
+    logger.info('Running with the parameters\n%s', ia_str)
+
+    logger.info('run path is %s', args.run_path)
+
+    mses = []
+    for i, tt in enumerate(kf):
+        ad = arg_dict.copy()
+        train_index, test_index = tt
+        test_sens = [int(a) for a in sensors[test_index]]
+        logger.info('testing with %s' % test_sens)
+        ad.update({'analyze_sensors': test_sens,
+                   'witheld_sensors': test_sens,
+                   'output_path': os.path.join(save_dir, str(i))})
+        if 'sumatra_label' in ad:
+            del ad['sumatra_label']
+        params_path = os.path.join(save_dir, 'params_{}.yaml'.format(i))
+        with open(params_path, 'w') as f:
+            yaml.dump(ad, f)
+        run_str = "{} {}".format(
+            args.run_path, params_path)
+        logger.info('Run %s of %s', i+1, cvk)
+        try:
+            subprocess.call(run_str, shell=True)
+        except subprocess.CalledProcessError:
+            logger.exception('')
+        with open(os.path.join(ad['output_path'], 'mses'), 'r') as f:
+            mses.append((i, test_sens, f.read()))
+
+    with open(os.path.join(save_dir, 'mses'), 'w') as f:
+        for i, alist, mseline in mses:
+            f.write('{}, {}, {}\n'.format(i, alist, mseline))

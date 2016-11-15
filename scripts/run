@@ -1,0 +1,91 @@
+#!/usr/bin/env python
+import os
+import argparse
+import logging
+
+
+import yaml
+
+
+import satoi.exec_oi
+import satoi.input_data
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Run OI based on a config file')
+    parser.add_argument('config_path', help='Path to the config file')
+    args = parser.parse_args()
+
+    with open(args.config_path, 'rb') as f:
+        arg_dict = yaml.load(f)
+
+    if 'sumatra_label' in arg_dict:
+        save_dir = os.path.join(arg_dict['output_path'],
+                                arg_dict['sumatra_label'])
+        label = arg_dict['sumatra_label']
+    else:
+        save_dir = arg_dict['output_path']
+        label = None
+
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
+
+    if not os.path.isfile(arg_dict['input_data']):
+        satoi.input_data.main(arg_dict['raw_data_path'],
+                              arg_dict['satellite_file'],
+                              arg_dict['input_data'],
+                              label,
+                              arg_dict['suny'],
+                              arg_dict.get('times_file', None))
+
+    level = getattr(logging, arg_dict['loglevel'].upper())
+    logging_path = os.path.join(save_dir,
+                                arg_dict['logging_filename'])
+    formatter = logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s')
+    handler = logging.FileHandler(logging_path)
+    handler.setFormatter(formatter)
+    handler.setLevel(level)
+    logger = logging.getLogger()
+    logger.addHandler(handler)
+    logger.setLevel(level)
+    if label is not None:
+        logger.info('Running with sumatra label %s', label)
+
+    class input_args(object):
+        def __init__(self, level, save_dir, arg_dict):
+            self.verbose = int(20 / level)
+            self.gpu = arg_dict['gpu_number']
+            self.path = arg_dict['input_data']
+            self.old_correlation = False
+            self.length = arg_dict['correlation_length']
+            self.gamma = arg_dict['gamma']
+            self.save_dir = save_dir
+            self.correlation_variable = arg_dict['correlation_variable']
+            self.keep_sensors = arg_dict['keep_sensors']
+            self.d_inflation = arg_dict['d_inflation']
+            self.analyze_sensors = arg_dict['analyze_sensors']
+            self.witheld_sensors = arg_dict['witheld_sensors']
+            self.random_times = arg_dict['use_random_times']
+            self.nearby_points = arg_dict['points_for_H']
+            self.cloud_radius = arg_dict.get('cloud_edge_distance', None)
+            self.shift_clouds = arg_dict['min_mse_shift_clouds']
+            self.clear_d_scale = arg_dict['clear_d_scale']
+            self.no_shift = arg_dict.get('no_cloud_shift', True)
+            self.spatial_correlation = arg_dict.get('spatial_correlation',
+                                                    False)
+            self.dtype = arg_dict.get('dtype', None)
+            self.empirical_P = arg_dict.get('empirical_P', False)
+
+    ia = input_args(level, save_dir, arg_dict)
+    ia_str = ''
+    for key, val in ia.__dict__.items():
+        ia_str += '\t{}: {}\n'.format(key, val)
+
+    logger.info('Running with the parameters\n%s', ia_str)
+    sh_mse, un_mse = satoi.exec_oi.main(ia)
+    with open(os.path.join(save_dir, 'mses'), 'w') as f:
+        f.write('{}, {}'.format(sh_mse, un_mse))
+
+if __name__ == '__main__':
+    main()

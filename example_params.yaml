@@ -1,0 +1,28 @@
+input_data: # path to the input file, will be created with raw data if does not exist
+times_file: # path to a file that indicates which times are in the training and verification data-sets, will be created if does not exist
+suny: no
+raw_data_path: # path to the raw data
+satellite_file: # path to the satellite data
+output_path: # output directory
+loglevel: info
+logging_filename: run.log
+gpu_number: 1
+correlation_variable: PA
+correlation_length: 0.2
+gamma: 0
+witheld_sensors: [11184,]
+bkeep_sensors: [403, 404, 405, 409, 427, 429, 432, 433, 435, 437, 439, 445, 452]
+keep_sensors: [403, 404, 405, 409, 427, 429, 432, 433, 435, 437, 439, 445, 452]
+analyze_sensors: [11184,]
+d_inflation: 12.5
+use_random_times: null
+points_for_H: 1
+cloud_edge_distance: 1.1
+min_mse_shift_clouds: yes
+no_cloud_shift: yes
+clear_d_scale: 0.08
+spatial_correlation: no
+dtype: float32
+random_state: 0
+cvk: 6
+empirical_P: no
