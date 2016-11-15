@@ -3,6 +3,8 @@ satellite_irradiance_optimal_interpolation
 
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc/4.0/)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.166778.svg)](https://doi.org/10.5281/zenodo.166778)
+
 This code was used to perform optimal interpolation of satellite derived
 and ground sensor data to produce better irradiance nowcasts. It was used
 to produce the analysis in the paper ["Optimal Interpolation of Satellite
