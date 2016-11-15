@@ -1,7 +1,7 @@
 satellite_irradiance_optimal_interpolation
 ------------------------------------------
 
-[!License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc/4.0/)
+[![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc/4.0/)
 
 This code was used to perform optimal interpolation of satellite derived
 and ground sensor data to produce better irradiance nowcasts. It was used
@@ -14,4 +14,4 @@ simulations. All parameters for OI can be specified in a parameter YAML file
 and tracked by sumatra.
 
 This is a research code and is neither supported nor guaranteed. It has
-been released under the [CC-BY-NC 4.0 license]((http://creativecommons.org/licenses/by-nc/4.0/).
+been released under the [CC-BY-NC 4.0 license](http://creativecommons.org/licenses/by-nc/4.0/).
