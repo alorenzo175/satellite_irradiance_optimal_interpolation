@@ -1,6 +1,6 @@
 satellite_irradiance_optimal_interpolation
 ------------------------------------------
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.166778.svg)](https://doi.org/10.5281/zenodo.166778)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.166799.svg)](https://doi.org/10.5281/zenodo.166799)
 
 This code was used to perform optimal interpolation of satellite derived
 and ground sensor data to produce better irradiance nowcasts. It was used
