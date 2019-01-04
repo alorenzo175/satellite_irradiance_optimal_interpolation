@@ -12,5 +12,8 @@ I recommend using [sumatra](http://sumatra.readthedocs.io) to keep track of
 simulations. All parameters for OI can be specified in a parameter YAML file
 and tracked by sumatra.
 
+Scripts to run the code after installation are located in the ``scripts`` directory.
+A valid configuration file like ``example_config.yaml`` is required to set the proper data paths and parameters.
+
 This is a research code and is neither supported nor guaranteed. It has
 been released under the MIT License.
